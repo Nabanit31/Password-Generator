@@ -1,11 +1,14 @@
-import { useState,useCallback } from 'react'
-
+import { useState,useCallback,useEffect,useRef } from 'react'
+import { ToastContainer, toast,Bounce } from 'react-toastify';
 
 function App() {
- const [length, setLength] = useState(8)
+ const [length, setLength] = useState(12)
  const [numberAllowed, setNumberAllowed] = useState(false)
  const [charAllowed, setCharAllowed] = useState(false)
  const [Password, setPassword] = useState("")
+
+//useRef
+const passwordRef = useRef(null)
 
  const PasswordGenerator= useCallback(() =>{
   let pass = ""
@@ -20,14 +23,23 @@ function App() {
     str += "!@#$%^&*()_+~`|}{[]:;?><,./-="
   }
 
-  for(let i = 0; i <=Array.length; i++){
-    let cahr = Math.floor(Math.random() * str.length + 1)
-    pass = str.charAt(char)
+  for(let i = 0; i <=length; i++){
+    let char = Math.floor(Math.random() * str.length + 1)
+    pass += str.charAt(char)
   }
   setPassword(pass)
 
  },[length, numberAllowed, charAllowed,setPassword])
 
+//copying clipboard passwordGenerator
+const copyPasswordToClipboard = useCallback(() =>{
+  window.navigator.clipboard.writeText(Password)
+  toast.success("Password copied!");
+},[Password])
+
+useEffect(()=>{
+  PasswordGenerator()
+},[length,numberAllowed,charAllowed,PasswordGenerator])
   return (
     <>
       <div className="w-full max-w-md mx-auto shadow-md rounded-lg
@@ -40,8 +52,11 @@ function App() {
         className='outline-none w-full bg-white py-1 px-3'
         placeholder='Password'
         readOnly
+        ref={passwordRef}
       />
-      <button className='outline-none bg-blue-600 text-white px-3 py-0.5
+      <button
+        onClick={copyPasswordToClipboard}
+      className='outline-none bg-blue-600 text-white px-3 py-0.5
       shrink-0 cursor-pointer'>Copy</button>
       </div>
       <div className="flex text-sm gap-x-2">
@@ -53,7 +68,7 @@ function App() {
           value={length}
           onChange={(e) => {setLength(e.target.value)}}
           />
-          <label>Length of Password : {length}</label>
+          <label>Length : {length}</label>
         </div>
         <div className="flex items-center gap-x-1">
 
@@ -67,6 +82,15 @@ function App() {
           />
           <label htmlFor="numberInput">Numbers</label>
         </div>
+        <div className="flex items-center gap-x-1">
+          <input type="checkbox"
+          defaultChecked={charAllowed}
+          id='characterInput'
+          onChange={()=>{
+            setCharAllowed((prev)=>!prev)
+          }} />
+        </div>
+        <label htmlFor="characterInput">Characters</label>
       </div>
       </div>
     </>
